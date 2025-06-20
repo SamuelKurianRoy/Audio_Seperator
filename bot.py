@@ -6,8 +6,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.error import BadRequest
 from audio_processing import separate_stems, analyze_audio
 
-DOWNLOAD_DIR = st.secrets.get('DOWNLOAD_DIR', 'downloads')
-STEMS_DIR = st.secrets.get('STEMS_DIR', 'stems')
+DOWNLOAD_DIR = 'downloads'
+STEMS_DIR = 'stems'
 
 # Set up logging for your bot
 logging.basicConfig(
@@ -25,12 +25,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("telegram").setLevel(logging.WARNING)
 logging.getLogger("apscheduler").setLevel(logging.WARNING)
 
-# Load environment variables from .env file (if present)
-env_path = st.secrets.get('ENV_PATH', '.env')
-try:
-    load_dotenv(env_path)
-except Exception:
-    pass
+# Only require TELEGRAM_BOT_TOKEN from Streamlit secrets
 TELEGRAM_BOT_TOKEN = st.secrets["TELEGRAM_BOT_TOKEN"]
 if not TELEGRAM_BOT_TOKEN:
     raise EnvironmentError('Please set the TELEGRAM_BOT_TOKEN secret in Streamlit Cloud.')

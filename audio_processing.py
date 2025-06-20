@@ -45,9 +45,9 @@ def separate_stems(audio_path, output_dir):
     logger = logging.getLogger(__name__)
     try:
         logger.info(f"Spleeter: Separating stems for {audio_path}")
-        # Ensure model is downloaded
-        model_dir = st.secrets.get('SPLEETER_MODEL_DIR', 'pretrained_models/2stems')
-        model_url = st.secrets.get('SPLEETER_MODEL_URL', 'https://github.com/deezer/spleeter/releases/download/v1.4.0/2stems.zip')
+        # Use hardcoded defaults for model directory and URL
+        model_dir = 'pretrained_models/2stems'
+        model_url = 'https://github.com/deezer/spleeter/releases/download/v1.4.0/2stems.zip'
         ensure_model_downloaded(model_dir, model_url)
         separator = Separator(model_dir)
         base_name = os.path.splitext(os.path.basename(audio_path))[0]
