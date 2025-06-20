@@ -1,13 +1,13 @@
-import os
 import logging
+import streamlit as st
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram.error import BadRequest
 from audio_processing import separate_stems, analyze_audio
 
-DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR', 'downloads')
-STEMS_DIR = os.getenv('STEMS_DIR', 'stems')
+DOWNLOAD_DIR = st.secrets.get('DOWNLOAD_DIR', 'downloads')
+STEMS_DIR = st.secrets.get('STEMS_DIR', 'stems')
 
 # Set up logging for your bot
 logging.basicConfig(
@@ -26,12 +26,14 @@ logging.getLogger("telegram").setLevel(logging.WARNING)
 logging.getLogger("apscheduler").setLevel(logging.WARNING)
 
 # Load environment variables from .env file (if present)
-env_path = os.getenv('ENV_PATH', '.env')
-if os.path.exists(env_path):
+env_path = st.secrets.get('ENV_PATH', '.env')
+try:
     load_dotenv(env_path)
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+except Exception:
+    pass
+TELEGRAM_BOT_TOKEN = st.secrets["TELEGRAM_BOT_TOKEN"]
 if not TELEGRAM_BOT_TOKEN:
-    raise EnvironmentError('Please set the TELEGRAM_BOT_TOKEN environment variable.')
+    raise EnvironmentError('Please set the TELEGRAM_BOT_TOKEN secret in Streamlit Cloud.')
 
 def get_username(update):
     user = update.effective_user
@@ -119,16 +121,17 @@ def handle_audio(update: Update, context):
 
 def main():
     logger.info('Bot is starting...')
-    updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(MessageHandler(Filters.audio | Filters.voice | Filters.document.audio, handle_audio))
-    print('Bot is running...')
-    logger.info('Bot is running and ready to receive audio files!')
-    updater.start_polling()
-    updater.idle()
+    try:
+        updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
+        dp = updater.dispatcher
+        dp.add_handler(CommandHandler('start', start))
+        dp.add_handler(MessageHandler(Filters.audio | Filters.voice | Filters.document.audio, handle_audio))
+        print('Bot is running...')
+        logger.info('Bot is running and ready to receive audio files!')
+        updater.start_polling()
+        updater.idle()
+    except Exception as e:
+        logger.error(f"Fatal error in bot main loop: {e}")
+        st.error(f"Fatal error in bot main loop: {e}")
     print("Bot main() has exited!")  # This should never print unless the bot is stopped
     logger.info("Bot main() has exited!")
-
-if __name__ == '__main__':
-    main()

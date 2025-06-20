@@ -87,4 +87,9 @@ stems/
 
 # System files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Streamlit secrets and cache
+.streamlit/secrets.toml
+.streamlit/*.toml
+.streamlit/cache/ 
